@@ -1,0 +1,21 @@
+name: Build libHexedTracer.so
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (armeabi-v7a)
+        run: |
+          export NDK="${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_ROOT}"
+          chmod +x build.sh
+          ./build.sh
+          file libHexedTracer.so
+          readelf -d libHexedTracer.so | grep -E "NEEDED|SONAME"
+          readelf -Ws --dyn-syms libHexedTracer.so | grep -E "HexedTracerCfg|OnModLoad|__GetModInfo|modinfo"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libHexedTracer
+          path: libHexedTracer.so
